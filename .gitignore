@@ -7,3 +7,4 @@ blinker
 *.elf
 thirdparty
 thirdparty/*
+*.lss
