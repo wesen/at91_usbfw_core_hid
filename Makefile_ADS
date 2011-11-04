@@ -1,0 +1,378 @@
+#/* ----------------------------------------------------------------------------
+# *         ATMEL Microcontroller Software Support  -  ROUSSET  -
+# * ----------------------------------------------------------------------------
+# * Copyright (c) 2006, Atmel Corporation
+#
+# * All rights reserved.
+# *
+# * Redistribution and use in source and binary forms, with or without
+# * modification, are permitted provided that the following conditions are met:
+# *
+# * - Redistributions of source code must retain the above copyright notice,
+# * this list of conditions and the disclaiimer below.
+# *
+# * - Redistributions in binary form must reproduce the above copyright notice,
+# * this list of conditions and the disclaimer below in the documentation and/or
+# * other materials provided with the distribution.
+# *
+# * Atmel`s name may not be used to endorse or promote products derived from
+# * this software without specific prior written permission.
+# *
+# * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+# * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+# * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+# * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+# * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# * ----------------------------------------------------------------------------
+# *
+#
+# $Id: Makefile 135 2006-10-19 15:50:25Z jjoannic $
+#
+#-------------------------------------------------------------------------------
+#       Parameters
+#-------------------------------------------------------------------------------
+#
+#   TARGET:     target chip         (default: TARGET=AT91SAM7S64)
+#   BOARD:      board used          (default: BOARD=AT91SAM7SEK)
+#   CLASS:      USB class           (default: CLASS=ENUM)
+#   MODE:       Media or subclass   (default: MODE=NO)
+#   REMAP:      Run from SRAM       (default: REMAP=NO)
+#   DEBUG:      Debug symbols       (default: DEBUG=NO)
+#   LEDS:       Use leds            (default: LEDS=YES)
+#   TRACES:     Output traces       (default: TRACES=YES)
+#   POWER:      Self/bus powered    (default: POWER=AUTO)
+#   REVISION:   Board revision      (default: REV_B)
+#-------------------------------------------------------------------------------
+
+!MESSAGE
+!MESSAGE
+
+#-------------------------------------------------------------------------------
+#       Check parameters
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#       Check target
+#-------------------------------------------------------------------------------
+
+!IFNDEF TARGET
+!MESSAGE Warning: No target selected, using default target AT91SAM7S64.
+TARGET = AT91SAM7S64
+!ELSEIF "$(TARGET)" != "AT91SAM7S321"  && "$(TARGET)" != "AT91SAM7S64"   \
+     && "$(TARGET)" != "AT91SAM7S128"  && "$(TARGET)" != "AT91SAM7S256"  \
+     && "$(TARGET)" != "AT91SAM7S512"  && "$(TARGET)" != "AT91SAM7SE32"  \
+     && "$(TARGET)" != "AT91SAM7SE256" && "$(TARGET)" != "AT91SAM7SE512" \
+     && "$(TARGET)" != "AT91SAM7X128"  && "$(TARGET)" != "AT91SAM7X256"  \
+     && "$(TARGET)" != "AT91SAM7X512"  && "$(TARGET)" != "AT91SAM7A3"    \
+     && "$(TARGET)" != "AT91RM9200"    && "$(TARGET)" != "AT91SAM9260"   \
+     && "$(TARGET)" != "AT91SAM9261"   && "$(TARGET)" != "AT91SAM9263"
+
+!ERROR Error: $(TARGET): Unknown target.
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Check board
+#-------------------------------------------------------------------------------
+
+!IFNDEF BOARD
+!MESSAGE Warning: No board selected, using default board AT91SAM7SEK.
+BOARD = AT91SAM7SEK
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Check class
+#-------------------------------------------------------------------------------
+!IFNDEF CLASS
+!MESSAGE Warning: No class selected, using default enumeration class.
+CLASS = ENUM
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Check remap
+#-------------------------------------------------------------------------------
+!IFNDEF REMAP
+REMAP = NO
+!ELSEIF "$(REMAP)" != "YES"
+!UNDEF REMAP
+REMAP = NO
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Check debug
+#-------------------------------------------------------------------------------
+!IFNDEF DEBUG
+DEBUG = NO
+!ELSEIF "$(DEBUG)" != "YES"
+!UNDEF DEBUG
+DEBUG = NO
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Check leds
+#-------------------------------------------------------------------------------
+!IFNDEF LEDS
+LEDS = YES
+!ELSEIF "$(LEDS)" != "NO"
+LEDS = YES
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Check traces
+#-------------------------------------------------------------------------------
+!IFNDEF TRACES
+TRACES = YES
+!ELSEIF "$(TRACES)" != "NO"
+TRACES = YES
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Check power
+#-------------------------------------------------------------------------------
+!IFNDEF POWER
+POWER = AUTO
+!ELSEIF "$(POWER)" != "BUS"
+TRACES = AUTO
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Check mode
+#-------------------------------------------------------------------------------
+!IFNDEF MODE
+MODE = NO
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Summary
+#-------------------------------------------------------------------------------
+
+!MESSAGE
+!MESSAGE Target:  $(TARGET)
+!MESSAGE Board:   $(BOARD)
+!MESSAGE Class:   $(CLASS)
+!MESSAGE Mode:    $(MODE)
+!MESSAGE Remap:   $(REMAP)
+!MESSAGE Debug:   $(DEBUG)
+!MESSAGE Leds:    $(LEDS)
+!MESSAGE Traces:  $(TRACES)
+!MESSAGE Power:   $(POWER)
+
+!IF "$(TARGET)" == "AT91SAM7A3"
+!IFNDEF REVISION
+!MESSAGE Revision: REV_B
+!ELSE
+!MESSAGE Revision: $(REVISION)
+!ENDIF
+!ENDIF
+
+!MESSAGE
+
+#-------------------------------------------------------------------------------
+#       Memory
+#-------------------------------------------------------------------------------
+
+!IF "$(TARGET)" == "AT91SAM7S321"
+!MESSAGE SRAM=8K FLASH=32K
+!ELSEIF "$(TARGET)" == "AT91SAM7S64"
+!MESSAGE SRAM=16K FLASH=64K
+!ELSEIF "$(TARGET)" == "AT91SAM7S128"
+!MESSAGE SRAM=32K FLASH=128K
+!ELSEIF "$(TARGET)" == "AT91SAM7S256"
+!MESSAGE SRAM=64K FLASH=256K
+!ELSEIF "$(TARGET)" == "AT91SAM7S512"
+!MESSAGE SRAM=64K FLASH=512K
+!ELSEIF "$(TARGET)" == "AT91SAM7SE32"
+!MESSAGE SRAM=8K FLASH=32K
+!ELSEIF "$(TARGET)" == "AT91SAM7SE256"
+!MESSAGE SRAM=32K FLASH=256K
+!ELSEIF "$(TARGET)" == "AT91SAM7SE512"
+!MESSAGE SRAM=32K FLASH=512K
+!ELSEIF "$(TARGET)" == "AT91SAM7X128"
+!MESSAGE SRAM=32K FLASH=128K
+!ELSEIF "$(TARGET)" == "AT91SAM7X256"
+!MESSAGE SRAM=64K FLASH=256K
+!ELSEIF "$(TARGET)" == "AT91SAM7X512"
+!MESSAGE SRAM=128K FLASH=512K
+!ELSEIF "$(TARGET)" == "AT91SAM7A3"
+!MESSAGE SRAM=32K FLASH=256K
+!ELSEIF "$(TARGET)" == "AT91RM9200"
+!MESSAGE SRAM=16K NOFLASH
+!ELSEIF "$(TARGET)" == "AT91SAM9260"
+!MESSAGE SRAM=2x4K NOFLASH
+!ELSEIF "$(TARGET)" == "AT91SAM9261"
+!MESSAGE SRAM=160K NOFLASH
+!ELSEIF "$(TARGET)" == "AT91SAM9263"
+!MESSAGE SRAM NOFLASH
+!ELSE
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Tools
+#-------------------------------------------------------------------------------
+
+AS = armasm
+LD = armlink
+FE = fromelf
+THUMB_CC = tcc
+ARM_CC = armcc
+CC = $(THUMB_CC)
+
+#-------------------------------------------------------------------------------
+#       Output directories
+#-------------------------------------------------------------------------------
+
+BIN = bin
+OBJ = obj
+
+#-------------------------------------------------------------------------------
+#       Files
+#-------------------------------------------------------------------------------
+
+STARTUP = startup
+
+#-------------------------------------------------------------------------------
+#       Target-dependant parameters
+#-------------------------------------------------------------------------------
+
+# Start of memory regions
+RAM_START = 0x00200000
+ROM_START = 0x00100000
+
+# Include directories
+LIB = lib/$(TARGET)
+
+#-------------------------------------------------------------------------------
+#       Debug mode
+#-------------------------------------------------------------------------------
+
+ifreq ($(DEBUG),YES)
+OPTIMIZATION = -O0 -Ono_inline -g+
+else
+OPTIMIZATION = -O2
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Compilation flags
+#-------------------------------------------------------------------------------
+
+ASFLAGS = -g -keep -PD "$(TARGET) SETA 1" -apcs /interwork -fpu None\
+          -i$(LIB)
+CCFLAGS = -apcs /interwork -gtp -Wb+avnglp -D__APCS_INTERWORK\
+          $(OPTIMIZATION) -D$(TARGET) -D$(BOARD) -I$(LIB) -I./
+
+!IF "$(LEDS)" == "NO"
+CCFLAGS = $(CCFLAGS) -DNOLEDS
+!ENDIF
+
+!IF "$(TRACES)" == "NO"
+CCFLAGS = $(CCFLAGS) -DNOTRACES
+!ENDIF
+
+!IF "$(REMAP)" == "YES"
+ASFLAGS = $(ASFLAGS) -PD "REMAP SETA 1"
+!ENDIF
+
+!IF "$(DEBUG)" == "YES"
+ASFLAGS = $(ASFLAGS) -PD "DEBUG SETA 1"
+!ENDIF
+
+!IF "$(POWER)" == "BUS"
+CCFLAGS = $(CCFLAGS) -DUSB_BUS_POWERED
+!ENDIF
+
+!IF "$(MODE)" != "NO"
+CCFLAGS = $(CCFLAGS) -D$(MODE)
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Linker flags
+#-------------------------------------------------------------------------------
+
+LDFLAGS = -entry __ENTRY -ro-base 0 -nolocals -first $(STARTUP).o(reset)\
+          -info totals
+
+!IF "$(REMAP)" == "NO" && "$(DEBUG)" == "NO"
+LDFLAGS = $(LDFLAGS) -rw-base $(RAM_START)
+!ENDIF
+
+!IF "$(DEBUG)" == "NO"
+LDFLAGS = $(LDFLAGS) -nodebug
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Objects
+#-------------------------------------------------------------------------------
+
+COREOBJ = core.o
+
+!IF "$(CLASS)" != "ENUM"
+CLASSOBJ = $(CLASS).o
+!ENDIF
+
+#-------------------------------------------------------------------------------
+#       Directives
+#-------------------------------------------------------------------------------
+
+# Binary
+BINARY = $(BOARD)_$(CLASS)
+
+!IF "$(MODE)" != "NO"
+BINARY = $(BINARY)_$(MODE)
+!ENDIF
+
+!IF "$(DEBUG)" == "YES"
+BINARY = $(BINARY)_DEBUG
+!ENDIF
+
+!MESSAGE
+
+all: $(BIN)/$(TARGET)/$(BINARY)
+
+$(BIN)/$(TARGET)/$(BINARY): $(STARTUP).o $(COREOBJ) $(CLASSOBJ)
+    @echo Building $@ ...
+    @if not exist $(BIN) mkdir $(BIN)
+    @if not exist $(BIN)\$(TARGET) mkdir $(BIN)\$(TARGET)
+    @cd $(OBJ)
+    @$(LD) -o ../$*.axf $(LDFLAGS) $?
+    @$(FE) -bin -output ../$*.bin ../$*.axf
+!IF "$(DEBUG)" == "NO"
+    @del ..\$(BIN)\$(TARGET)\$(BINARY).axf
+!ENDIF
+    @cd ..
+
+$(STARTUP).o: $(@B).s
+    @echo Building $@ ...
+    @if not exist $(OBJ) mkdir $(OBJ)
+    @$(AS) $(ASFLAGS) $? -o $(OBJ)/$@
+
+$(COREOBJ):
+    @echo Entering $(MAKEDIR)\core ...
+    @cd core
+    @call $(MAKE) /NOLOGO BOARD=$(BOARD) CLASS=$(CLASS) LIB=../$(LIB) \
+    MODE=$(MODE) REMAP=$(REMAP) DEBUG=$(DEBUG) LEDS=$(LEDS) TRACES=$(TRACES) \
+    POWER=$(POWER) OBJ=..\$(OBJ) BIN=..\$(BIN) TARGET=$(TARGET)
+    @cd ..
+    @echo Leaving $(MAKEDIR)\core ...
+
+!IF "$(CLASS)" != "ENUM"
+$(CLASSOBJ):
+    @echo Entering $(MAKEDIR)\$(CLASS) ...
+    @cd $(CLASS)
+    @call $(MAKE) /NOLOGO BOARD=$(BOARD) CLASS=$(CLASS) LIB=../$(LIB) \
+    MODE=$(MODE) REMAP=$(REMAP) DEBUG=$(DEBUG) LEDS=$(LEDS) TRACES=$(TRACES) \
+    POWER=$(POWER) OBJ=..\$(OBJ) BIN=..\$(BIN) TARGET=$(TARGET)
+    @cd ..
+    @echo Leaving $(MAKEDIR)\$(CLASS) ...
+!ENDIF
+
+rebuild: clean all
+
+clean:
+    @echo Cleaning project ...
+    @if exist $(OBJ)\*.o del $(OBJ)\*.o
+    @if exist $(BIN)\$(TARGET)\$(BINARY).* del $(BIN)\$(TARGET)\$(BINARY).*
+
+

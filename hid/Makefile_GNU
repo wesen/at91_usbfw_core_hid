@@ -1,0 +1,146 @@
+
+# GNU-make port by Martin Thomas (not Atmel)
+
+#/* ----------------------------------------------------------------------------
+# *         ATMEL Microcontroller Software Support  -  ROUSSET  -
+# * ----------------------------------------------------------------------------
+# * Copyright (c) 2006, Atmel Corporation
+#
+# * All rights reserved.
+# *
+# * Redistribution and use in source and binary forms, with or without
+# * modification, are permitted provided that the following conditions are met:
+# *
+# * - Redistributions of source code must retain the above copyright notice,
+# * this list of conditions and the disclaiimer below.
+# *
+# * - Redistributions in binary form must reproduce the above copyright notice,
+# * this list of conditions and the disclaimer below in the documentation and/or
+# * other materials provided with the distribution.
+# *
+# * Atmel`s name may not be used to endorse or promote products derived from
+# * this software without specific prior written permission.
+# *
+# * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+# * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+# * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+# * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+# * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# * ----------------------------------------------------------------------------
+# */
+
+# $Id: Makefile 118 2006-10-17 12:50:13Z jjoannic $
+
+#SHELL = cmd
+
+#-------------------------------------------------------------------------------
+#       Use
+#-------------------------------------------------------------------------------
+#
+#   Do not call this file directly, use the topmost Makefile instead.
+#
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+#       Tools
+#-------------------------------------------------------------------------------
+
+TOOLCHAIN_PREFIX=arm-none-eabi
+AS = $(TOOLCHAIN_PREFIX)-as
+LD = $(TOOLCHAIN_PREFIX)-ld
+FE = $(TOOLCHAIN_PREFIX)-objcopy
+THUMB_CC = $(TOOLCHAIN_PREFIX)-gcc -mthumb
+ARM_CC = $(TOOLCHAIN_PREFIX)-gcc
+CC = $(THUMB_CC)
+
+#-------------------------------------------------------------------------------
+#       Debug mode
+#-------------------------------------------------------------------------------
+
+ifeq ($(DEBUG),YES)
+OPTIMIZATION = -O0 -gdwarf-2 -fno-inline
+else
+OPTIMIZATION = -O2
+endif
+
+#-------------------------------------------------------------------------------
+#       Compilation flags
+#-------------------------------------------------------------------------------
+
+#TODO
+#CCFLAGS = -apcs /interwork -gtp -Wb+avnglp -D__APCS_INTERWORK\
+#          $(OPTIMIZATION) -D$(TARGET) -D$(BOARD) -I$(LIB) -I./
+CCFLAGS = -mcpu=$(MCPU) -std=gnu99 -Wall -mthumb-interwork \
+          $(OPTIMIZATION) -D$(TARGET) -D$(BOARD) -I$(LIB) -I../ \
+		  -ffunction-sections -fdata-sections
+
+ifeq ($(LEDS),NO)
+CCFLAGS = $(CCFLAGS) -DNOLEDS
+endif
+
+ifeq ($(TRACES),NO)
+CCFLAGS := $(CCFLAGS) -DNOTRACES
+endif
+
+ifeq ($(POWER),BUS)
+CCFLAGS := $(CCFLAGS) -DUSB_BUS_POWERED
+endif
+
+ifneq ($(MODE),NO)
+CCFLAGS := $(CCFLAGS) -D$(MODE)
+endif
+
+#-------------------------------------------------------------------------------
+#       Linker flags
+#-------------------------------------------------------------------------------
+
+#LDFLAGS = -nolocals
+
+ifeq ($(DEBUG),NO)
+## todo
+LDFLAGS := $(LDFLAGS) -nodebug
+endif
+
+
+#-------------------------------------------------------------------------------
+#       Object files
+#-------------------------------------------------------------------------------
+
+OUTPUT = HID.o
+
+ifeq ($(MODE),MOUSE)
+OBJECTS = mouse_driver.o mouse_example.o
+else
+OBJECTS = keyboard_driver.o keyboard_example.o
+endif
+
+#-------------------------------------------------------------------------------
+#       Directives
+#-------------------------------------------------------------------------------
+
+all: $(OUTPUT)
+
+#$(OBJECTS): $(@B).c
+#    @echo Building $@ ...
+#    @if not exist $(OBJ) mkdir $(OBJ)
+#    @$(CC) -c $(CCFLAGS) $? -o $(OBJ)/$@
+#$(OBJECTS): $(@B).c
+
+$(OBJECTS): %.o : %.c
+	@echo Building $@ ...
+#	@if not exist $(OBJ) mkdir $(OBJ)
+	$(CC) -c $(CCFLAGS) -o $(OBJ)/$@ $<
+
+
+#$(OUTPUT): $(OBJECTS)
+#    @echo Linking $@ ...
+#    @cd $(OBJ)
+#    @$(LD) -partial -output $(OUTPUT) $(LDFLAGS) $?
+$(OUTPUT): $(OBJECTS)
+	@echo Linking $@ ...
+	cd $(OBJ) && $(LD) --relocatable $(LDFLAGS) --output=$(OUTPUT) $(OBJECTS)
